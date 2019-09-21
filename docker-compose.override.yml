@@ -1,0 +1,33 @@
+# Vue.js frontend with Python Flask backend
+# Overrides the base compose file for dev environment
+# Use for development only, with `docker-compose up`
+
+version: '3.7'
+
+services:
+
+  # Vue.js (development)
+  frontend:
+    build:
+      target: development
+    container_name: "vue-frontend-dev"
+    ports:
+     - "8080:8080"
+    volumes:
+     - ./frontend:/app
+
+  # Flask app (development)
+  backend:
+    build:
+      target: development
+    container_name: "flask-backend-dev"
+    ports:
+      - "5000:5000"
+      - "2992:2992"
+    env_file:
+      - .env
+    environment: 
+      FLASK_DEBUG: 1
+      FLASK_ENV: development
+    volumes:
+      - ./backend:/app

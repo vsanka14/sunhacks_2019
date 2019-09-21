@@ -1,0 +1,33 @@
+# Vue.js frontend with Python Flask backend
+# Overrides the base compose file with prod environment
+# Use for staging environment or building production images
+
+version: '3.7'
+
+services:
+
+  # Vue.js (production)
+  frontend:
+    build:
+      target: production
+    container_name: "frontend"
+    #image: fill in with frontend image from registry
+    ports:
+      - "8080:2992"
+
+  # Flask app (production)
+  backend:
+    restart: always
+    build:
+      target: production
+    container_name: "backend"
+    #image: fill in with backend image from registry
+    ports:
+      - "5000:5000"
+      - "2992:2992"
+    env_file:
+      - .env
+    environment:
+      FLASK_DEBUG: 0
+      FLASK_ENV: production
+    entrypoint: backend/.docker/start-server-postgres.sh --host=0.0.0.0

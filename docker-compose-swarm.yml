@@ -1,0 +1,68 @@
+# Compose file used for deploying a stack to a docker swarm
+# For use in production
+
+version: '3.7'
+
+networks:
+  cluster:
+    external: true
+
+services:
+  # Each of the following are containers
+
+  # Vue.js app (production)
+  frontend:
+    restart: always
+    image: # fill in with frontend image from registry
+    deploy:
+      replicas: 3
+    depends_on:
+      - backend
+    ports:
+      - "8080:8080"
+    networks:
+      - cluster
+      
+    
+  # Flask app (production)
+  backend:
+    restart: always
+    image: # fill in with backend image from registry
+    deploy:
+      replicas: 3
+    depends_on:
+      - cache
+    environment:
+      FLASK_DEBUG: 0
+      FLASK_ENV: development
+    ports:
+      - "5000:5000"
+      - "2992:2992"
+    entrypoint: .docker/start-server-postgres.sh --host=0.0.0.0
+    networks:
+      - cluster
+
+  # Redis
+  cache:
+    deploy:
+      replicas: 3
+    restart: always
+    image: redis:alpine
+    networks:
+      - cluster
+
+  # Visualizer
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "8081:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - cluster
+    
+volumes:
+  db-data:

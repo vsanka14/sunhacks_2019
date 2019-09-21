@@ -1,0 +1,63 @@
+# Vue.js frontend, Python Flask backend, Postgres DB, Redis cache
+# Base compose file
+# Changes to versioning and infrastructure should occur here
+
+version: '3.7'
+
+x-build-args: &build_args
+  nodeVersion: "8.15.1"
+
+services:
+  # Each of the following are containers
+
+  # Vue.js app (base)
+  frontend:
+    build:
+      context: frontend
+      dockerfile: .docker/Dockerfile
+      args:
+        <<: *build_args
+    depends_on:
+      - backend
+    volumes:
+      - node-modules-frontend:/app/node_modules
+      
+    
+  # Flask app (base)
+  backend:
+    build:
+      context: backend
+      dockerfile: .docker/Dockerfile
+      args:
+        pythonVersion: "3.6"
+        pipVersion: "18.1"
+        <<: *build_args
+    depends_on:
+      - database
+      - cache
+    volumes:
+      - node-modules-backend:/app/node_modules
+    entrypoint: .docker/start-server-postgres.sh --host=0.0.0.0
+
+  # Postgres
+  database:
+   image: postgres:alpine
+   container_name: "postgres-db"
+   environment:
+     - POSTGRES_USER=${DB_USER}
+     - POSTGRES_PASSWORD=${DB_PASSWORD}
+     - POSTGRES_DB=${DB}
+   volumes:
+     - db-data:/var/lib/postgresql/data
+   ports:
+     - "5432:5432"
+
+  # Redis
+  cache:
+    container_name: "redis"
+    image: redis:alpine
+    
+volumes:
+  db-data:
+  node-modules-frontend:
+  node-modules-backend:
