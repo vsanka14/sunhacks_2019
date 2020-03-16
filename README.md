@@ -141,9 +141,4 @@ http://endpoint:8080, http://endpoint:5000
 A swarm visualizer is also available at:
 ```
 http://endpoint:8081
-```
-
-## Authors
-
-* **Alex Makoviecki** - *amakovie@asu.edu*
-* **Ramesh Gorantla** - *rgorantl@mainex1.asu.edu*
+`
